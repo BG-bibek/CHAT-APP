@@ -1,5 +1,6 @@
 const { z } = require("zod");
 const Event = require('../models/event');
+const CustomError = require('../errors/custom-error'); // Import CustomError
 
 const eventSchema = z.object({
     eventName: z
@@ -8,30 +9,33 @@ const eventSchema = z.object({
         .regex(/^[a-zA-Z0-9]+$/, "Event name must contain only alphanumeric characters."),
 });
 
-
-
 const validateCreateEvent = async (req, res, next) => {
     try {
         // Validate the input using Zod
         const data = eventSchema.parse(req.body);
+
         // Check for uniqueness in the database
         const existingEvent = await Event.findOne({ name: data.eventName });
         if (existingEvent) {
-            return res.status(400).json({ error: "Event name already exists." });
+            throw new CustomError("Event name already exists.", 400, "fail");
         }
+
         // If valid, proceed to the next middleware/controller
         next();
     } catch (error) {
-        // Handle validation errors
         if (error instanceof z.ZodError) {
-            return res.status(400).json({
-                errors: error.errors.map(e => e.message),
-            });
+            // Handle Zod validation errors
+            const errorMessage = error.errors.map((e) => e.message).join(", ");
+            next(new CustomError(errorMessage, 400, "fail")); // Pass structured error to global handler
+        } else if (error instanceof CustomError) {
+            // Forward CustomError to global handler
+            next(error);
+        } else {
+            // Handle unexpected errors
+            console.error("Unexpected error:", error);
+            next(new CustomError("Internal server error.", 500, "error")); // Generic server error
         }
-        console.error("Validation error:", error);
-        res.status(500).json({ error: "Internal server error." });
     }
 };
 
-
-module.exports = {  validateCreateEvent };
+module.exports = { validateCreateEvent };
