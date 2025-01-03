@@ -11,7 +11,7 @@ const createEvent = async (req, res) => {
         });
     } catch (error) {
         console.error('Error creating event:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        throw new CustomError('Internal Server Error', 500, 'fail');
     }
 };
 

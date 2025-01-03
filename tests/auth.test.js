@@ -1,3 +1,4 @@
+require('dotenv').config();
 const request = require("supertest");
 const mongoose = require("mongoose");
 const app = require("../src/loaders/server")(); // Adjust the path to your server initialization file
@@ -5,25 +6,13 @@ const User = require("../src/models/user"); // Adjust the path to your User mode
 const connectToDatabase = require("../src/database/connection"); // Adjust the path to your DB connection file
 const { JWT_SECRET } = require("../src/config/config"); // Adjust the path to your config file
 const jwt = require("jsonwebtoken");
-
+const bcrypt = require("bcryptjs");
 describe("POST /api/auth", () => {
-    beforeAll(async () => {
-        await connectToDatabase();
-        await User.deleteMany({}); // Clear the User collection
-
-        // Create a test user
-        const hashedPassword = await bcrypt.hash("testpassword", 10);
-        await User.create({ username: "testuser", password: hashedPassword });
-    });
-
-    afterAll(async () => {
-        await mongoose.disconnect();
-    });
 
     test("should return 200 and a token for valid credentials", async () => {
         const res = await request(app)
             .post("/api/auth")
-            .send({ username: "testuser", password: "testpassword" });
+            .send({ username: "admin", password: "adminpass" });
 
         expect(res.statusCode).toBe(200);
         expect(res.body).toHaveProperty("token");
@@ -31,7 +20,7 @@ describe("POST /api/auth", () => {
         // Verify the token
         const decoded = jwt.verify(res.body.token, JWT_SECRET);
         expect(decoded).toHaveProperty("userId");
-        expect(decoded).toHaveProperty("username", "testuser");
+        expect(decoded).toHaveProperty("username", "admin");
     });
 
     test("should return 401 for invalid username", async () => {
