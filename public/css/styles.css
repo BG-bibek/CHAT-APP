@@ -1,0 +1,23 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background-color: #f4f4f9;
+}
+
+#messages {
+  border: 1px solid #ccc;
+  padding: 10px;
+  height: 300px;
+  overflow-y: auto;
+  background: #fff;
+  margin-bottom: 10px;
+}
+
+#messageInput {
+  width: calc(100% - 80px);
+}
+
+#sendButton {
+  width: 70px;
+}

@@ -4,28 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Real-Time Webcasting</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f9;
-        }
-        #messages {
-            border: 1px solid #ccc;
-            padding: 10px;
-            height: 300px;
-            overflow-y: auto;
-            background: #fff;
-            margin-bottom: 10px;
-        }
-        #messageInput {
-            width: calc(100% - 80px);
-        }
-        #sendButton {
-            width: 70px;
-        }
-    </style>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <h1>Real-Time Webcasting</h1>
@@ -44,89 +23,6 @@
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
-
-        const joinEventButton = document.getElementById('joinEvent');
-        const eventIdInput = document.getElementById('eventId');
-        const usernameInput = document.getElementById('username');
-        const chatDiv = document.getElementById('chat');
-        const messagesDiv = document.getElementById('messages');
-        const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton');
-
-        function scrollToBottom() {
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
-        function limitMessages(maxMessages = 100) {
-            while (messagesDiv.children.length > maxMessages) {
-                messagesDiv.removeChild(messagesDiv.firstChild);
-            }
-        }
-
-        joinEventButton.addEventListener('click', () => {
-            const eventId = eventIdInput.value.trim();
-            const username = usernameInput.value.trim();
-
-            if (!eventId || !username) {
-                alert('Event ID and username are required!');
-                return;
-            }
-
-            socket.emit('joinEvent', { eventId, username });
-
-            eventIdInput.disabled = true;
-            usernameInput.disabled = true;
-            chatDiv.style.display = 'block';
-        });
-
-        socket.on('userJoined', (message) => {
-            const messageElement = document.createElement('div');
-            messageElement.textContent = message;
-            messagesDiv.appendChild(messageElement);
-            scrollToBottom();
-        });
-
-        socket.on('userLeft', (message) => {
-            const messageElement = document.createElement('div');
-            messageElement.textContent = message;
-            messagesDiv.appendChild(messageElement);
-            scrollToBottom();
-        });
-
-        socket.on('message', (data) => {
-            const messageElement = document.createElement('div');
-            const timestamp = new Date().toLocaleTimeString();
-            messageElement.textContent = `[${timestamp}] ${data.username}: ${data.message}`;
-            messagesDiv.appendChild(messageElement);
-            limitMessages();
-            scrollToBottom();
-        });
-
-        socket.on('previousMessages', (messages) => {
-            messages.forEach(({ username, message }) => {
-                const messageElement = document.createElement('div');
-                messageElement.textContent = `${username}: ${message}`;
-                messagesDiv.appendChild(messageElement);
-            });
-            scrollToBottom();
-        });
-
-        socket.on('error', (errorMessage) => {
-            alert(`Error: ${errorMessage}`);
-        });
-
-        sendButton.addEventListener('click', () => {
-            const message = messageInput.value.trim();
-            const eventId = eventIdInput.value.trim();
-            const username = usernameInput.value.trim();
-
-            if (!message) return;
-
-            socket.emit('sendMessage', { eventId, username, message });
-            messageInput.value = '';
-        });
-    </script>
+    <script src="js/app.js"></script>
 </body>
 </html>
